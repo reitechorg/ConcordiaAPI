@@ -80,6 +80,13 @@ const setupPrisma = async (database: Database) => {
 	console.log(chalk.green("[SETUP] Database schema created!"));
 };
 
+const validateServerURL = (serverURL: string) => {
+	serverURL = serverURL.trim();
+	if (!serverURL.startsWith("http://") && !serverURL.startsWith("https://")) return "Server URL must be either http or https!";
+	if (serverURL.endsWith("/")) return "Server URL must not end with a slash!";
+	return true;
+};
+
 const setup = async () => {
 	let database: Database | null = null;
 
@@ -100,9 +107,10 @@ const setup = async () => {
 	const serverName = (await input({ message: "Server name: ", required: true, validate: validateServerName })).trim();
 	const description = (await input({ message: "Server description: ", validate: validateDescription })).trim();
 	const logEvents = await confirm({ message: "Log events?", default: true });
+	const serverURL = (await input({ message: "Server URL: ", required: true, validate: validateServerURL })).trim();
 
 	console.log(chalk.green("\n[SETUP] Saving server configuration..."));
-	fs.writeFileSync("./.env", `DATABASE_URL=${database!.dbUrl}\nSERVER_NAME=${serverName}\nDESCRIPTION=${description}\nLOG_EVENTS=${logEvents}\nOPEN=true`);
+	fs.writeFileSync("./.env", `DATABASE_URL=${database!.dbUrl}\nSERVER_NAME=${serverName}\nDESCRIPTION=${description}\nLOG_EVENTS=${logEvents}\nURL=${serverURL}\nOPEN=true`);
 	fs.writeFileSync("./.serverdata.json", `{"version":"0.0.0", "lastUpdate":0}`); // TODO check for update
 
 	console.log(chalk.green("\n[SETUP] Admin user:"));
