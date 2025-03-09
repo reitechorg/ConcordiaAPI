@@ -15,6 +15,7 @@
 	"dependencies": {
 		"@fastify/cors": "^10.1.0",
 		"@fastify/view": "^10.0.2",
+		"@fastify/websocket": "^11.0.2",
 		"@inquirer/prompts": "^7.3.2",
 		"@paralleldrive/cuid2": "^2.2.2",
 		"@prisma/client": "6.4.1",
@@ -38,6 +39,7 @@
 		]
 	},
 	"devDependencies": {
-		"@types/node": "^22.13.4"
+		"@types/node": "^22.13.4",
+		"@types/ws": "^8.18.0"
 	}
 }

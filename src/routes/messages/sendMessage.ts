@@ -1,6 +1,7 @@
 import { FastifyReply } from "fastify";
 import db from "../../modules/database.js";
 import { RequestWithUser } from "../../types/RequestWithUser.js";
+import { connections } from "../../lib/handleMessage.js";
 
 interface Body {
 	message: string;
@@ -26,7 +27,28 @@ export default async function ApiSendMessage(req: RequestWithUser, res: FastifyR
 				},
 			},
 		},
+		include: {
+			author: {
+				select: {
+					id: true,
+					name: true,
+					profileUrl: true,
+				},
+			},
+		},
 	});
 
+	connections.forEach((connection) => {
+		connection.send(
+			JSON.stringify({
+				type: "newMessage",
+				data: {
+					serverUrl: connection.url,
+					channelId: id,
+					message: newMessage,
+				},
+			}),
+		);
+	});
 	res.send(newMessage);
 }

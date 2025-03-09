@@ -28,7 +28,9 @@ import ApiStatus from "../routes/config/status.js";
 import chalk from "chalk";
 import ApiRoot from "../routes/root.js";
 import ApiInitLogin from "../routes/auth/init.js";
-
+import ApiLoginWithPassword from "../routes/auth/passwordLogin.js";
+import websocket from "@fastify/websocket";
+import { connections, incomingMessage } from "../lib/handleMessage.js";
 
 export default async function runHTTPServer() {
 	const fastify = Fastify({
@@ -39,6 +41,23 @@ export default async function runHTTPServer() {
 	const authPut = authenticatedPathRegistrator(fastify, "PUT");
 	const authGet = authenticatedPathRegistrator(fastify, "GET");
 	const authDelete = authenticatedPathRegistrator(fastify, "DELETE");
+
+	// WebSocket
+	fastify.register(websocket);
+	fastify.register(async function (fastify) {
+		fastify.get("/ws", { websocket: true }, (connection) => {
+			connection.on("message", (msg: any) => {
+				incomingMessage(msg);
+			});
+
+			connection.on("open", () => {
+				console.log("Socket opened");
+				connection.send("Hello, world!");
+			});
+
+			connections.push(connection);
+		});
+	});
 
 	fastify.addHook("onRequest", OpenCheck);
 
@@ -69,6 +88,7 @@ export default async function runHTTPServer() {
 	//
 	fastify.post("/auth/init", ApiInitLogin);
 	fastify.post("/auth/login", ApiLogin);
+	fastify.post("/auth/login/password", ApiLoginWithPassword);
 	fastify.post("/auth/register", ApiRegister);
 
 	//

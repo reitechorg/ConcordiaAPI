@@ -9,7 +9,5 @@ export default async function ApiDeleteToken(req: RequestWithUser, res: FastifyR
 		},
 	});
 
-	console.log(token);
-
 	res.status(200).send({ message: "Logged out" });
 }
