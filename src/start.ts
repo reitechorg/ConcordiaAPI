@@ -1,10 +1,14 @@
 import chalk from "chalk";
 import runHTTPServer from "./modules/router.js";
 import updateHandler from "./modules/update.js";
+import { loadServerIcon } from "./lib/serverIcon.js";
 
 if (process.env.DEV) {
 	console.log(chalk.blue("Running in DEV mode"));
 }
+
+// Load icon
+loadServerIcon();
 
 // Start API server
 runHTTPServer();
