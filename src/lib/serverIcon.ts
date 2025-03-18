@@ -1,6 +1,6 @@
 import sharp from "sharp";
 
-let serverIcon: string | null = null;
+let serverIcon: string = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
 
 export async function loadServerIcon() {
 	// Check if the server icon exists
