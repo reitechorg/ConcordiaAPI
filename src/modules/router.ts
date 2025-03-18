@@ -40,6 +40,7 @@ import { randomString } from "../lib/randomString.js";
 import fileUpload from "../lib/fileUpload.js";
 import ApiSendAttachment from "../routes/attachments/addAttachment.js";
 import ApiGetAttachment from "../routes/attachments/getAttachment.js";
+import log from "../lib/log.js";
 
 export default async function runHTTPServer() {
 	const fastify = Fastify({
