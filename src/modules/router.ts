@@ -44,27 +44,26 @@ export default async function runHTTPServer() {
 
 	// WebSocket
 	fastify.register(websocket);
-	fastify.register(async function (fastify) {
-		fastify.get("/ws", { websocket: true }, (connection) => {
-			connection.on("message", (msg: any) => {
-				incomingMessage(msg);
-			});
-
-			connection.on("open", () => {
-				console.log("Socket opened");
-				connection.send("Hello, world!");
-			});
-
-			connections.push(connection);
-		});
-	});
-
-	fastify.addHook("onRequest", OpenCheck);
 
 	// Register cors
 	await fastify.register(cors, {
 		origin: true,
 	});
+
+	// Websocket handle
+	fastify.register(async function (fastify) {
+		fastify.get("/ws", { websocket: true }, (socket) => {
+			socket.on("message", (msg: any) => {
+				incomingMessage(msg);
+			});
+
+			console.log("New connection!", socket);
+			socket.send("Hello, world!");
+			connections.push(socket);
+		});
+	});
+
+	fastify.addHook("onRequest", OpenCheck);
 
 	// Register view
 	await fastify.register(fastifyView, {
