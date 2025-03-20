@@ -103,16 +103,19 @@ const setup = async () => {
 	const setup = await confirm({ message: "Create database schema?", default: true });
 	if (setup) setupPrisma(database);
 
+	// Server config
 	console.log(chalk.green("\n[SETUP] Server configuration:"));
 	const serverName = (await input({ message: "Server name: ", required: true, validate: validateServerName })).trim();
 	const description = (await input({ message: "Server description: ", validate: validateDescription })).trim();
 	const logEvents = await confirm({ message: "Log events?", default: true });
 	const serverURL = (await input({ message: "Server URL: ", required: true, validate: validateServerURL })).trim();
 
+	// Save server config
 	console.log(chalk.green("\n[SETUP] Saving server configuration..."));
 	fs.writeFileSync("./.env", `DATABASE_URL=${database!.dbUrl}\nSERVER_NAME=${serverName}\nDESCRIPTION=${description}\nLOG_EVENTS=${logEvents}\nURL=${serverURL}\nOPEN=true`);
 	fs.writeFileSync("./.serverdata.json", `{"version":"0.0.0", "lastUpdate":0}`); // TODO check for update
 
+	// Admin setup
 	console.log(chalk.green("\n[SETUP] Admin user:"));
 	const adminName = (await input({ message: "Username: ", required: true, validate: validateUsername })).trim();
 	const adminPassword = await password({ message: "Password: ", validate: validatePassword });

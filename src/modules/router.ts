@@ -31,10 +31,25 @@ import ApiInitLogin from "../routes/auth/init.js";
 import ApiLoginWithPassword from "../routes/auth/passwordLogin.js";
 import websocket from "@fastify/websocket";
 import { connections, incomingMessage } from "../lib/handleMessage.js";
+import Multipart from "@fastify/multipart";
+import { pipeline } from "node:stream/promises";
+import fs from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
+import { randomString } from "../lib/randomString.js";
+import fileUpload from "../lib/fileUpload.js";
+import ApiSendAttachment from "../routes/attachments/addAttachment.js";
+import ApiGetAttachment from "../routes/attachments/getAttachment.js";
 
 export default async function runHTTPServer() {
 	const fastify = Fastify({
 		logger: process.env.DEV ? true : false,
+	});
+
+	// Register cors
+	await fastify.register(cors, {
+		origin: true,
+		allowedHeaders: ["content-type", "accept", "authorization"],
 	});
 
 	const authPost = authenticatedPathRegistrator(fastify, "POST");
@@ -44,11 +59,6 @@ export default async function runHTTPServer() {
 
 	// WebSocket
 	fastify.register(websocket);
-
-	// Register cors
-	await fastify.register(cors, {
-		origin: true,
-	});
 
 	// Websocket handle
 	fastify.register(async function (fastify) {
@@ -72,6 +82,24 @@ export default async function runHTTPServer() {
 		},
 		root: "./src/templates",
 		production: !process.env.DEV,
+	});
+
+	// Register multipart
+	fastify.register(Multipart, {
+		limits: {
+			fieldNameSize: 1, // Max field name size in bytes
+			fieldSize: 1, // Max field value size in bytes
+			fields: 1, // Max number of non-file fields
+			fileSize: 2500000, // For multipart forms, the max file size in bytes
+			files: 1, // Max number of file fields
+			headerPairs: 20, // Max number of header key=>value pairs
+			parts: 1000, // For multipart forms, the max number of parts (fields + files)
+		},
+	});
+
+	fastify.post("/image", async (req, res) => {
+		const imagePath = await fileUpload(req, res);
+		console.log("New image at", imagePath);
 	});
 
 	//
@@ -105,6 +133,10 @@ export default async function runHTTPServer() {
 	authPost("/channels/:id/messages", ApiSendMessage);
 	authPut("/channels/:channelId/messages/:messageId", ApiUpdateMessage);
 	authDelete("/channels/:channelId/messages/:messageId", ApiDeleteMessage);
+
+	// Attachments
+	authPost("/channels/:channelId/messages/attachment", ApiSendAttachment);
+	fastify.get("/files/:fileId", ApiGetAttachment);
 
 	// Channels
 	authGet("/channels", ApiGetChannels);

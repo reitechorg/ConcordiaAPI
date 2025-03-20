@@ -9,7 +9,7 @@ interface Body {
 
 export default async function ApiSendMessage(req: RequestWithUser, res: FastifyReply) {
 	const { message } = req.body as Body;
-	const { id } = req.params as { id: string }; // 🤮🤮🤮 I ❤️ TS, it's so nice
+	const { id } = req.params as { id: string };
 
 	if (!message || message.length < 0) return res.send({ status: 400, message: "No message provided" });
 
