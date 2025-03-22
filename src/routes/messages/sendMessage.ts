@@ -30,7 +30,7 @@ export default async function ApiSendMessage(req: RequestWithUser, res: FastifyR
 				},
 			},
 			files: {
-				connect: [...(files?.map((file) => ({ id: file.id })) || [])],
+				connect: files?.map((file) => ({ id: file.id })) || [],
 			},
 		},
 		include: {
