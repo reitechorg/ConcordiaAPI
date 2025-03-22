@@ -24,7 +24,6 @@ model User {
   updatedAt  DateTime @updatedAt
 
   messages Message[]
-  attachments Attachment[]
   files File[]
   tokens Token[]
   roles Role[]
@@ -43,10 +42,10 @@ model Message {
   authorId  String?
   channel   Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
   channelId String
-  
+  files     File[]
+
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-
 
   @@index(fields: [createdAt])
 }
@@ -56,26 +55,13 @@ model File {
   filename  String    @db.VarChar(255)
   mimetype  String    @db.VarChar(255)
   path      String    @db.VarChar(255)
+  Message   Message? @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  messageId String?
 
   author    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId  String?
 
-  attachments Attachment[]
-}
-
-model Attachment {
-  id        String    @id @default(cuid())
-
-  file      File    @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  fileId    String  
-
-  author    User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  authorId  String?
-  channel   Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  channelId String
-  
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  @@index (fields:[filename])
 }
 
 model Channel {
@@ -87,7 +73,6 @@ model Channel {
   updatedAt   DateTime  @updatedAt
   
   messages  Message[]
-  attachments Attachment[]
   permissions Permission[]
 }
 

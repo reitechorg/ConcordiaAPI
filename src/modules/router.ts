@@ -87,20 +87,16 @@ export default async function runHTTPServer() {
 
 	// Register multipart
 	fastify.register(Multipart, {
+		attachFieldsToBody: true,
 		limits: {
-			fieldNameSize: 1, // Max field name size in bytes
-			fieldSize: 1, // Max field value size in bytes
-			fields: 1, // Max number of non-file fields
+			fieldNameSize: 20, // Max field name size in bytes
+			fieldSize: 500, // Max field value size in bytes
+			fields: 5, // Max number of non-file fields
 			fileSize: 2500000, // For multipart forms, the max file size in bytes
-			files: 1, // Max number of file fields
-			headerPairs: 20, // Max number of header key=>value pairs
-			parts: 1000, // For multipart forms, the max number of parts (fields + files)
+			files: 10, // Max number of file fields
+			headerPairs: 1000, // Max number of header key=>value pairs
+			parts: 10000, // For multipart forms, the max number of parts (fields + files)
 		},
-	});
-
-	fastify.post("/image", async (req, res) => {
-		const imagePath = await fileUpload(req, res);
-		console.log("New image at", imagePath);
 	});
 
 	//
@@ -136,7 +132,6 @@ export default async function runHTTPServer() {
 	authDelete("/channels/:channelId/messages/:messageId", ApiDeleteMessage);
 
 	// Attachments
-	authPost("/channels/:channelId/messages/attachment", ApiSendAttachment);
 	fastify.get("/files/:fileId", ApiGetAttachment);
 
 	// Channels
