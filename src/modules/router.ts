@@ -41,6 +41,8 @@ import fileUpload from "../lib/fileUpload.js";
 import ApiSendAttachment from "../routes/attachments/addAttachment.js";
 import ApiGetAttachment from "../routes/attachments/getAttachment.js";
 import log from "../lib/log.js";
+import ApiConfig from "../routes/config/configuration.js";
+import ApiUpdateConfig from "../routes/config/updateConfiguration.js";
 
 export default async function runHTTPServer() {
 	const fastify = Fastify({
@@ -149,6 +151,10 @@ export default async function runHTTPServer() {
 	// Roles w/ users
 	authPost("/roles/:roleId/users/:userId", ApiAssignRole); // Add user to role
 	authDelete("/roles/:roleId/users/:userId", ApiUnassignRole); // Remove user from role
+
+	// Server configuration
+	authGet("/config", ApiConfig);
+	authPost("/config", ApiUpdateConfig);
 
 	// Start the server
 	fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err: Error | null, address: string) {

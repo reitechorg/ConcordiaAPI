@@ -109,6 +109,8 @@ enum Permissions {
   ROLE_UPDATE
   ROLE_DELETE
   ROLE_ASSIGN
+
+  SERVER_UPDATE
 }
 
 enum PermissionState {
