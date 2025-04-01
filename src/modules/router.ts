@@ -31,10 +31,28 @@ import ApiInitLogin from "../routes/auth/init.js";
 import ApiLoginWithPassword from "../routes/auth/passwordLogin.js";
 import websocket from "@fastify/websocket";
 import { connections, incomingMessage } from "../lib/handleMessage.js";
+import Multipart from "@fastify/multipart";
+import { pipeline } from "node:stream/promises";
+import fs from "node:fs";
+import path from "node:path";
+import sharp from "sharp";
+import { randomString } from "../lib/randomString.js";
+import fileUpload from "../lib/fileUpload.js";
+import ApiSendAttachment from "../routes/attachments/addAttachment.js";
+import ApiGetAttachment from "../routes/attachments/getAttachment.js";
+import log from "../lib/log.js";
+import ApiConfig from "../routes/config/configuration.js";
+import ApiUpdateConfig from "../routes/config/updateConfiguration.js";
 
 export default async function runHTTPServer() {
 	const fastify = Fastify({
 		logger: process.env.DEV ? true : false,
+	});
+
+	// Register cors
+	await fastify.register(cors, {
+		origin: true,
+		allowedHeaders: ["content-type", "accept", "authorization"],
 	});
 
 	const authPost = authenticatedPathRegistrator(fastify, "POST");
@@ -44,27 +62,21 @@ export default async function runHTTPServer() {
 
 	// WebSocket
 	fastify.register(websocket);
+
+	// Websocket handle
 	fastify.register(async function (fastify) {
-		fastify.get("/ws", { websocket: true }, (connection) => {
-			connection.on("message", (msg: any) => {
+		fastify.get("/ws", { websocket: true }, (socket) => {
+			socket.on("message", (msg: any) => {
 				incomingMessage(msg);
 			});
 
-			connection.on("open", () => {
-				console.log("Socket opened");
-				connection.send("Hello, world!");
-			});
-
-			connections.push(connection);
+			console.log("New connection!", socket);
+			socket.send("Hello, world!");
+			connections.push(socket);
 		});
 	});
 
 	fastify.addHook("onRequest", OpenCheck);
-
-	// Register cors
-	await fastify.register(cors, {
-		origin: true,
-	});
 
 	// Register view
 	await fastify.register(fastifyView, {
@@ -73,6 +85,20 @@ export default async function runHTTPServer() {
 		},
 		root: "./src/templates",
 		production: !process.env.DEV,
+	});
+
+	// Register multipart
+	fastify.register(Multipart, {
+		attachFieldsToBody: true,
+		limits: {
+			fieldNameSize: 20, // Max field name size in bytes
+			fieldSize: 500, // Max field value size in bytes
+			fields: 5, // Max number of non-file fields
+			fileSize: 2500000, // For multipart forms, the max file size in bytes
+			files: 10, // Max number of file fields
+			headerPairs: 1000, // Max number of header key=>value pairs
+			parts: 10000, // For multipart forms, the max number of parts (fields + files)
+		},
 	});
 
 	//
@@ -107,6 +133,9 @@ export default async function runHTTPServer() {
 	authPut("/channels/:channelId/messages/:messageId", ApiUpdateMessage);
 	authDelete("/channels/:channelId/messages/:messageId", ApiDeleteMessage);
 
+	// Attachments
+	fastify.get("/files/:fileId", ApiGetAttachment);
+
 	// Channels
 	authGet("/channels", ApiGetChannels);
 	authPost("/channels", ApiCreateChannel);
@@ -122,6 +151,10 @@ export default async function runHTTPServer() {
 	// Roles w/ users
 	authPost("/roles/:roleId/users/:userId", ApiAssignRole); // Add user to role
 	authDelete("/roles/:roleId/users/:userId", ApiUnassignRole); // Remove user from role
+
+	// Server configuration
+	authGet("/config", ApiConfig);
+	authPost("/config", ApiUpdateConfig);
 
 	// Start the server
 	fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err: Error | null, address: string) {

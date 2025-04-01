@@ -11,6 +11,9 @@ importers:
       '@fastify/cors':
         specifier: ^10.1.0
         version: 10.1.0
+      '@fastify/multipart':
+        specifier: ^9.0.3
+        version: 9.0.3
       '@fastify/view':
         specifier: ^10.0.2
         version: 10.0.2
@@ -24,8 +27,8 @@ importers:
         specifier: ^2.2.2
         version: 2.2.2
       '@prisma/client':
-        specifier: 6.4.1
-        version: 6.4.1(prisma@6.4.0(typescript@5.7.3))(typescript@5.7.3)
+        specifier: 6.5.0
+        version: 6.5.0(prisma@6.4.0(typescript@5.7.3))(typescript@5.7.3)
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
@@ -222,8 +225,14 @@ packages:
   '@fastify/ajv-compiler@4.0.2':
     resolution: {integrity: sha512-Rkiu/8wIjpsf46Rr+Fitd3HRP+VsxUFDDeag0hs9L0ksfnwx2g7SPQQTFL0E8Qv+rfXzQOxBJnjUB9ITUDjfWQ==}
 
+  '@fastify/busboy@3.1.1':
+    resolution: {integrity: sha512-5DGmA8FTdB2XbDeEwc/5ZXBl6UbBAyBOOLlPuBnZ/N1SwdH9Ii+cOX3tBROlDgcTXxjOYnLMVoKk9+FXAw0CJw==}
+
   '@fastify/cors@10.1.0':
     resolution: {integrity: sha512-MZyBCBJtII60CU9Xme/iE4aEy8G7QpzGR8zkdXZkDFt7ElEMachbE61tfhAG/bvSaULlqlf0huMT12T7iqEmdQ==}
+
+  '@fastify/deepmerge@2.0.2':
+    resolution: {integrity: sha512-3wuLdX5iiiYeZWP6bQrjqhrcvBIf0NHbQH1Ur1WbHvoiuTYUEItgygea3zs8aHpiitn0lOB8gX20u1qO+FDm7Q==}
 
   '@fastify/error@4.0.0':
     resolution: {integrity: sha512-OO/SA8As24JtT1usTUTKgGH7uLvhfwZPwlptRi2Dp5P4KKmJI3gvsZ8MIHnNwDs4sLf/aai5LzTyl66xr7qMxA==}
@@ -236,6 +245,9 @@ packages:
 
   '@fastify/merge-json-schemas@0.2.1':
     resolution: {integrity: sha512-OA3KGBCy6KtIvLf8DINC5880o5iBlDX4SxzLQS8HorJAbqluzLRn80UXU0bxZn7UOFhFgpRJDasfwn9nG4FG4A==}
+
+  '@fastify/multipart@9.0.3':
+    resolution: {integrity: sha512-pJogxQCrT12/6I5Fh6jr3narwcymA0pv4B0jbC7c6Bl9wnrxomEUnV0d26w6gUls7gSXmhG8JGRMmHFIPsxt1g==}
 
   '@fastify/proxy-addr@5.0.0':
     resolution: {integrity: sha512-37qVVA1qZ5sgH7KpHkkC4z9SK6StIsIcOmpjvMPXNb3vx2GQxhZocogVYbr2PbbeLCQxYIPDok307xEvRZOzGA==}
@@ -479,8 +491,8 @@ packages:
   '@paralleldrive/cuid2@2.2.2':
     resolution: {integrity: sha512-ZOBkgDwEdoYVlSeRbYYXs0S9MejQofiVYoTbKzy/6GQa39/q5tQU2IX46+shYnUkpEl3wc+J6wRlar7r2EK2xA==}
 
-  '@prisma/client@6.4.1':
-    resolution: {integrity: sha512-A7Mwx44+GVZVexT5e2GF/WcKkEkNNKbgr059xpr5mn+oUm2ZW1svhe+0TRNBwCdzhfIZ+q23jEgsNPvKD9u+6g==}
+  '@prisma/client@6.5.0':
+    resolution: {integrity: sha512-M6w1Ql/BeiGoZmhMdAZUXHu5sz5HubyVcKukbLs3l0ELcQb8hTUJxtGEChhv4SVJ0QJlwtLnwOLgIRQhpsm9dw==}
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
@@ -1051,10 +1063,14 @@ snapshots:
       ajv-formats: 3.0.1(ajv@8.17.1)
       fast-uri: 3.0.6
 
+  '@fastify/busboy@3.1.1': {}
+
   '@fastify/cors@10.1.0':
     dependencies:
       fastify-plugin: 5.0.1
       mnemonist: 0.40.0
+
+  '@fastify/deepmerge@2.0.2': {}
 
   '@fastify/error@4.0.0': {}
 
@@ -1067,6 +1083,14 @@ snapshots:
   '@fastify/merge-json-schemas@0.2.1':
     dependencies:
       dequal: 2.0.3
+
+  '@fastify/multipart@9.0.3':
+    dependencies:
+      '@fastify/busboy': 3.1.1
+      '@fastify/deepmerge': 2.0.2
+      '@fastify/error': 4.0.0
+      fastify-plugin: 5.0.1
+      secure-json-parse: 3.0.2
 
   '@fastify/proxy-addr@5.0.0':
     dependencies:
@@ -1284,7 +1308,7 @@ snapshots:
     dependencies:
       '@noble/hashes': 1.7.1
 
-  '@prisma/client@6.4.1(prisma@6.4.0(typescript@5.7.3))(typescript@5.7.3)':
+  '@prisma/client@6.5.0(prisma@6.4.0(typescript@5.7.3))(typescript@5.7.3)':
     optionalDependencies:
       prisma: 6.4.0(typescript@5.7.3)
       typescript: 5.7.3

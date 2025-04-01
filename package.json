@@ -11,14 +11,15 @@
 	"keywords": [],
 	"author": "E&E Digital s.r.o.",
 	"license": "ISC",
-	"packageManager": "pnpm@10.6.1",
+	"packageManager": "pnpm@10.6.5",
 	"dependencies": {
 		"@fastify/cors": "^10.1.0",
+		"@fastify/multipart": "^9.0.3",
 		"@fastify/view": "^10.0.2",
 		"@fastify/websocket": "^11.0.2",
 		"@inquirer/prompts": "^7.3.2",
 		"@paralleldrive/cuid2": "^2.2.2",
-		"@prisma/client": "6.4.1",
+		"@prisma/client": "6.5.0",
 		"bcryptjs": "^3.0.2",
 		"chalk": "^5.4.1",
 		"cross-env": "^7.0.3",
@@ -36,7 +37,8 @@
 			"@prisma/engines",
 			"bcrypt",
 			"esbuild",
-			"prisma"
+			"prisma",
+			"sharp"
 		]
 	},
 	"devDependencies": {

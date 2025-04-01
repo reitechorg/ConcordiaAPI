@@ -103,25 +103,41 @@ const setup = async () => {
 	const setup = await confirm({ message: "Create database schema?", default: true });
 	if (setup) setupPrisma(database);
 
+	// Server config
 	console.log(chalk.green("\n[SETUP] Server configuration:"));
 	const serverName = (await input({ message: "Server name: ", required: true, validate: validateServerName })).trim();
 	const description = (await input({ message: "Server description: ", validate: validateDescription })).trim();
 	const logEvents = await confirm({ message: "Log events?", default: true });
 	const serverURL = (await input({ message: "Server URL: ", required: true, validate: validateServerURL })).trim();
+	const storagePath = (await input({ message: "Storage path: [ex. ./files]", default: "./files", required: true })).trim();
 
+	// Save server config
 	console.log(chalk.green("\n[SETUP] Saving server configuration..."));
-	fs.writeFileSync("./.env", `DATABASE_URL=${database!.dbUrl}\nSERVER_NAME=${serverName}\nDESCRIPTION=${description}\nLOG_EVENTS=${logEvents}\nURL=${serverURL}\nOPEN=true`);
+	try {
+		if (!fs.existsSync(storagePath)) fs.mkdirSync(storagePath); // Create the storage directory if it doesn't exist
+	} catch (e) {
+		console.log(chalk.red("[SETUP] Error creating storage directory, please check the path and permissions"));
+	}
+
+	fs.writeFileSync("./.env", `DATABASE_URL=${database!.dbUrl}\nSERVER_NAME=${serverName}\nDESCRIPTION=${description}\nLOG_EVENTS=${logEvents}\nURL=${serverURL}\nFILE_PATH=${storagePath}\nOPEN=true`);
 	fs.writeFileSync("./.serverdata.json", `{"version":"0.0.0", "lastUpdate":0}`); // TODO check for update
 
+	// Admin setup
 	console.log(chalk.green("\n[SETUP] Admin user:"));
 	const adminName = (await input({ message: "Username: ", required: true, validate: validateUsername })).trim();
 	const adminPassword = await password({ message: "Password: ", validate: validatePassword });
 
 	console.log(chalk.green("\n[SETUP] Creating admin user..."));
+
 	// Create a temporary file to read data from
 	fs.writeFileSync("./.temp.env", `DATABASE_URL=${database!.dbUrl}\nADMIN_USERNAME=${adminName}\nADMIN_PASSWORD=${adminPassword}`);
+
 	// Run the script to create the admin user
 	execSync(`npx tsx --env-file=.temp.env ./scripts/createAdmin.ts`);
+
+	// Run script to create a default channel
+	execSync(`npx tsx --env-file=.temp.env ./scripts/createDefaultChannel.ts`);
+
 	// Remove the temporary file
 	fs.unlinkSync("./.temp.env");
 	console.log(chalk.green("[SETUP] Admin user created!"));

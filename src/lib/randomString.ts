@@ -1,6 +1,8 @@
-export function randomString(length: number) {
+export function randomString(length: number, simple?: boolean) {
 	let result = "";
-	const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+	let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+	if (simple) characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
 	const charactersLength = characters.length;
 	let counter = 0;
 	while (counter < length) {
