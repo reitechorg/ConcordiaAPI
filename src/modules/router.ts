@@ -43,6 +43,8 @@ import ApiGetAttachment from "../routes/attachments/getAttachment.js";
 import log from "../lib/log.js";
 import ApiConfig from "../routes/config/configuration.js";
 import ApiUpdateConfig from "../routes/config/updateConfiguration.js";
+import ApiPollVote from "../routes/polls/vote.js";
+import ApiConfigAccess from "../routes/config/access.js";
 
 export default async function runHTTPServer() {
 	const fastify = Fastify({
@@ -153,8 +155,12 @@ export default async function runHTTPServer() {
 	authDelete("/roles/:roleId/users/:userId", ApiUnassignRole); // Remove user from role
 
 	// Server configuration
+	authGet("/config/access", ApiConfigAccess);
 	authGet("/config", ApiConfig);
 	authPost("/config", ApiUpdateConfig);
+
+	// Polls
+	authPost("/channels/:channelId/polls/:pollId/:optionId", ApiPollVote);
 
 	// Start the server
 	fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err: Error | null, address: string) {

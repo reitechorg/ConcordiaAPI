@@ -27,6 +27,7 @@ model User {
   files File[]
   tokens Token[]
   roles Role[]
+  votes Vote[]
 }
 
 model Token {
@@ -43,6 +44,7 @@ model Message {
   channel   Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
   channelId String
   files     File[]
+  polls     Poll[]     @relation("PollMessages")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -74,6 +76,35 @@ model Channel {
   
   messages  Message[]
   permissions Permission[]
+}
+
+model Poll {
+  id          String    @id @default(cuid())
+  title       String    @db.VarChar(255)
+  options     Option[]  @relation("PollOptions")
+  message     Message? @relation("PollMessages", fields: [messageId], references: [id], onDelete: Cascade)
+  messageId   String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Option {
+  id          String    @id @default(cuid())
+  title       String    @db.VarChar(255)
+  pollId      String
+  opened      Boolean  @default(true)
+  poll        Poll      @relation("PollOptions", fields: [pollId], references: [id], onDelete: Cascade)
+  votes       Vote[]     @relation("OptionVotes")
+}
+
+model Vote {
+  id        String    @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  option    Option   @relation("OptionVotes", fields: [optionId], references: [id], onDelete: Cascade)
+  optionId  String
 }
 
 model Role {
