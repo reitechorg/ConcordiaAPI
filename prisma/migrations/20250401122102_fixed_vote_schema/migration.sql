@@ -7,19 +7,19 @@
 
 */
 -- DropForeignKey
-ALTER TABLE `_optionvotes` DROP FOREIGN KEY `_OptionVotes_A_fkey`;
+ALTER TABLE `_OptionVotes` DROP FOREIGN KEY `_OptionVotes_A_fkey`;
 
 -- DropForeignKey
-ALTER TABLE `_optionvotes` DROP FOREIGN KEY `_OptionVotes_B_fkey`;
+ALTER TABLE `_OptionVotes` DROP FOREIGN KEY `_OptionVotes_B_fkey`;
 
 -- AlterTable
-ALTER TABLE `poll` DROP COLUMN `description`;
+ALTER TABLE `Poll` DROP COLUMN `description`;
 
 -- AlterTable
-ALTER TABLE `vote` ADD COLUMN `optionId` VARCHAR(191) NOT NULL;
+ALTER TABLE `Vote` ADD COLUMN `optionId` VARCHAR(191) NOT NULL;
 
 -- DropTable
-DROP TABLE `_optionvotes`;
+DROP TABLE `_OptionVotes`;
 
 -- AddForeignKey
 ALTER TABLE `Vote` ADD CONSTRAINT `Vote_optionId_fkey` FOREIGN KEY (`optionId`) REFERENCES `Option`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
