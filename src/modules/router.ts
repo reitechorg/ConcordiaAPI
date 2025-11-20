@@ -32,15 +32,7 @@ import ApiLoginWithPassword from "../routes/auth/passwordLogin.js";
 import websocket from "@fastify/websocket";
 import { connections, incomingMessage } from "../lib/handleMessage.js";
 import Multipart from "@fastify/multipart";
-import { pipeline } from "node:stream/promises";
-import fs from "node:fs";
-import path from "node:path";
-import sharp from "sharp";
-import { randomString } from "../lib/randomString.js";
-import fileUpload from "../lib/fileUpload.js";
-import ApiSendAttachment from "../routes/attachments/addAttachment.js";
 import ApiGetAttachment from "../routes/attachments/getAttachment.js";
-import log from "../lib/log.js";
 import ApiConfig from "../routes/config/configuration.js";
 import ApiUpdateConfig from "../routes/config/updateConfiguration.js";
 import ApiPollVote from "../routes/polls/vote.js";
@@ -163,15 +155,22 @@ export default async function runHTTPServer() {
 	authPost("/channels/:channelId/polls/:pollId/:optionId", ApiPollVote);
 
 	// Start the server
-	fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err: Error | null, address: string) {
-		if (err) {
-			fastify.log.error(err);
-		}
+	fastify.listen(
+		{ port: 3000, host: "0.0.0.0" },
+		function (err: Error | null, address: string) {
+			if (err) {
+				fastify.log.error(err);
+			}
 
-		if (address) {
-			console.log(`${chalk.white.bold("Server listening on")} ${chalk.bold.green(address)}`);
-		}
-	});
+			if (address) {
+				console.log(
+					`${chalk.white.bold("Server listening on")} ${chalk.bold.green(
+						address,
+					)}`,
+				);
+			}
+		},
+	);
 
 	return fastify;
 }
