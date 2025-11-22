@@ -6,4 +6,9 @@ export default defineConfig({
 	migrations: {
 		path: "prisma/migrations",
 	},
+	datasource: {
+		url: process.env.DATABASE_URL
+			? env("DATABASE_URL")
+			: "mysql://user:password@localhost:1000/database",
+	},
 });
