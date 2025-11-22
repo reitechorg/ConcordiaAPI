@@ -1,5 +1,7 @@
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "@prisma/client";
+import dotenv from "dotenv";
+dotenv.config();
 
 function parseMysqlConnectionString(conn: string) {
 	// Ensure URL has a scheme so the URL parser can handle it
