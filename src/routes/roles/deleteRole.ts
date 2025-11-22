@@ -6,11 +6,16 @@ import { RequestWithUser } from "../../types/RequestWithUser.js";
 import unauthorized from "../../lib/noPermission.js";
 import log from "../../lib/log.js";
 
-export default async function ApiDeleteRole(req: RequestWithUser, res: FastifyReply) {
-	if (!hasPermission(req.user!, Permissions.ROLE_DELETE)) return unauthorized(res);
+export default async function ApiDeleteRole(
+	req: RequestWithUser,
+	res: FastifyReply,
+) {
+	if (!hasPermission(req.user!, Permissions.ROLE_DELETE))
+		return unauthorized(res);
 
 	const { roleId } = req.params as { roleId: string };
-	if (!roleId || roleId == ":roleId") return res.status(400).send("Malformed request");
+	if (!roleId || roleId == ":roleId")
+		return res.status(400).send("Malformed request");
 
 	try {
 		await db.role.delete({

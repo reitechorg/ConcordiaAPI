@@ -156,7 +156,10 @@ export default async function runHTTPServer() {
 
 	// Start the server
 	fastify.listen(
-		{ port: 3000, host: "0.0.0.0" },
+		{
+			port: parseInt(process.env.SERVER_PORT || "3000"),
+			host: "0.0.0.0",
+		},
 		function (err: Error | null, address: string) {
 			if (err) {
 				fastify.log.error(err);

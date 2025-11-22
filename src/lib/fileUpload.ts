@@ -5,8 +5,14 @@ import { pipeline } from "node:stream/promises";
 import log from "./log.js";
 import db from "../modules/database.js";
 import { RequestWithUser } from "../types/RequestWithUser.js";
+import path from "node:path";
 
-const acceptTypes = ["image/jpeg", "image/png", "image/webp", "application/json"];
+const acceptTypes = [
+	"image/jpeg",
+	"image/png",
+	"image/webp",
+	"application/json",
+];
 
 type Options = {
 	savePath?: string;
@@ -14,7 +20,11 @@ type Options = {
 };
 
 const errorUnsuported = (res: FastifyReply, type: string) => {
-	log(`Attempted upload of unsuported file type: ${type}`, "FILE_UPLOAD", "WARN");
+	log(
+		`Attempted upload of unsuported file type: ${type}`,
+		"FILE_UPLOAD",
+		"WARN",
+	);
 	return res.status(400).send("This endpoint doesn't support your file type");
 };
 
@@ -24,9 +34,16 @@ type L_File = {
 	path: string;
 };
 
-export default async function fileUpload(req: RequestWithUser, res: FastifyReply, options?: Options) {
+export default async function fileUpload(
+	req: RequestWithUser,
+	res: FastifyReply,
+	options?: Options,
+) {
 	// Validate server has a location path or an override was given
-	if (!process.env.FILE_PATH && !options?.savePath) return res.status(500).send("This server doesn't have a location to store files!");
+	if (!process.env.FILE_PATH && !options?.savePath)
+		return res
+			.status(500)
+			.send("This server doesn't have a location to store files!");
 
 	// Get the files
 	const data = await req.saveRequestFiles();
@@ -38,8 +55,10 @@ export default async function fileUpload(req: RequestWithUser, res: FastifyReply
 	await Promise.all(
 		data.map(async (file) => {
 			// Make sure filetype is accepted
-			if (options?.acceptTypes && !options.acceptTypes.includes(file.mimetype)) return errorUnsuported(res, file.mimetype); // Check for overriden types
-			if (!acceptTypes.includes(file.mimetype)) return errorUnsuported(res, file.mimetype); // Check for safe types
+			if (options?.acceptTypes && !options.acceptTypes.includes(file.mimetype))
+				return errorUnsuported(res, file.mimetype); // Check for overriden types
+			if (!acceptTypes.includes(file.mimetype))
+				return errorUnsuported(res, file.mimetype); // Check for safe types
 
 			// Get the file type extension
 			let type;
@@ -58,21 +77,26 @@ export default async function fileUpload(req: RequestWithUser, res: FastifyReply
 			// Genereta a filename
 			let fileName = randomString(32, true); // Create a name
 
-			let path = options?.savePath ? `${options.savePath}/${fileName}${type}` : `${process.env.FILE_PATH}/${fileName}${type}`;
+			// Create a path
+			let generatedPath = options?.savePath
+				? `${options.savePath}/${fileName}${type}`
+				: path.join(process.env.FILE_PATH!, "upload", `${fileName}${type}`);
 
 			// Make sure no file exists with this name
-			while (fs.existsSync(path)) {
+			while (fs.existsSync(generatedPath)) {
 				fileName = randomString(32, true);
-				path = options?.savePath ? `${options.savePath}/${fileName}${type}` : `${process.env.FILE_PATH}/${fileName}${type}`;
+				generatedPath = options?.savePath
+					? `${options.savePath}/${fileName}${type}`
+					: path.join(process.env.FILE_PATH!, "upload", `${fileName}${type}`);
 			}
 
 			// Save file
-			fs.copyFileSync(file.filepath, path);
+			fs.copyFileSync(file.filepath, generatedPath);
 
 			files.push({
 				filename: file.filename,
 				mimetype: file.mimetype,
-				path: path,
+				path: generatedPath,
 			});
 		}),
 	);

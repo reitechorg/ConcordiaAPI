@@ -1,4 +1,4 @@
-import { FastifyReply, FastifyRequest } from "fastify";
+import { FastifyReply } from "fastify";
 import db from "../../modules/database.js";
 import hasPermission from "../../lib/hasPermission.js";
 import { RequestWithUser } from "../../types/RequestWithUser.js";
@@ -6,8 +6,12 @@ import { Permissions } from "@prisma/client";
 import unauthorized from "../../lib/noPermission.js";
 import log from "../../lib/log.js";
 
-export default async function ApiUnassignRole(req: RequestWithUser, res: FastifyReply) {
-	if (!hasPermission(req.user!, Permissions.ROLE_ASSIGN)) return unauthorized(res);
+export default async function ApiUnassignRole(
+	req: RequestWithUser,
+	res: FastifyReply,
+) {
+	if (!hasPermission(req.user!, Permissions.ROLE_ASSIGN))
+		return unauthorized(res);
 
 	const { roleId, userId } = req.params as { roleId: string; userId: string };
 
