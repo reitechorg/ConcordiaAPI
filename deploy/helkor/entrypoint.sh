@@ -6,8 +6,8 @@ export TZ
 INTERNAL_IP=$(ip route get 1 | awk '{print $(NF-2);exit}')
 export INTERNAL_IP
 
-# Switch to the container's working directory
-cd /home/container || exit 1
+# Switch to the app working directory
+cd /app || exit 1
 
 # Convert all of the "{{VARIABLE}}" parts of the command into the expected shell
 # variable format of "${VARIABLE}" before evaluating the string and automatically
@@ -19,4 +19,5 @@ PARSED=$(echo "${STARTUP}" | sed -e 's/{{/${/g' -e 's/}}/}/g' | eval echo "$(cat
 # from the container itself.
 printf "\033[1m\033[33mServer Bootloader~ \033[0m%s\n" "$PARSED"
 
+pnpm prisma migrate deploy
 exec env ${PARSED}
