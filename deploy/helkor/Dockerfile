@@ -1,4 +1,4 @@
-FROM --platform=$TARGETOS/$TARGETARCH node:24-slim
+FROM --platform=$TARGETOS/$TARGETARCH node:24-alpine
 
 LABEL author="Helkor Hosting" maintainer="kontakt@helkor.eu"
 
