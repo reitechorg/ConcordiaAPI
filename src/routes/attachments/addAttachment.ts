@@ -5,7 +5,10 @@ import { RequestWithUser } from "../../types/RequestWithUser.js";
 import log from "../../lib/log.js";
 import { connections } from "../../lib/handleMessage.js";
 
-export default async function ApiSendAttachment(req: RequestWithUser, res: FastifyReply) {
+export default async function ApiSendAttachment(
+	req: RequestWithUser,
+	res: FastifyReply,
+) {
 	const file = await fileUpload(req, res);
 	if (!file) return res.status(500).send("Error handling file upload!");
 

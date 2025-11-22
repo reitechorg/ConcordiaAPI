@@ -5,10 +5,14 @@ import chalk from "chalk";
 
 const createAdmin = async () => {
 	if (!process.env.ADMIN_PASSWORD) {
-		throw new Error("[ERROR] [scripts/createAdmin] PASSWORD env is not defined");
+		throw new Error(
+			"[ERROR] [scripts/createAdmin] PASSWORD env is not defined",
+		);
 	}
 	if (!process.env.ADMIN_USERNAME) {
-		throw new Error("[ERROR] [scripts/createAdmin] USERNAME env is not defined");
+		throw new Error(
+			"[ERROR] [scripts/createAdmin] USERNAME env is not defined",
+		);
 	}
 
 	const permissions = Object.values(Permissions);

@@ -3,10 +3,13 @@ import fs from "node:fs";
 import log from "../../lib/log.js";
 import db from "../../modules/database.js";
 
-export default async function ApiGetAttachment(req: FastifyRequest, res: FastifyReply) {
+export default async function ApiGetAttachment(
+	req: FastifyRequest,
+	res: FastifyReply,
+) {
 	const { fileId } = req.params as { fileId: string };
 	try {
-		console.log(`${process.env.FILE_PATH}/${fileId}`);
+		console.log(`${process.env.FILE_PATH}/upload/${fileId}`);
 
 		const data = await db.file.findUnique({
 			where: {

@@ -3,6 +3,7 @@ import chalk from "chalk";
 import { execSync } from "child_process";
 import mysql from "mysql2/promise";
 import fs from "fs";
+import path from "path";
 
 const validateServerName = (servername: string) => {
 	servername = servername.trim();
@@ -168,7 +169,15 @@ const setup = async () => {
 			database!.dbUrl
 		}\nSERVER_NAME=${serverName}\nDESCRIPTION=${description}\nLOG_EVENTS=${logEvents}\nURL=${serverURL}\nFILE_PATH=${storagePath}\nOPEN=true`,
 	);
-	fs.writeFileSync("./.serverdata.json", `{"version":"0.0.0", "lastUpdate":0}`); // TODO check for update
+
+	// Create folders
+	fs.mkdirSync(path.join(storagePath, "server"), { recursive: true });
+	fs.mkdirSync(path.join(storagePath, "upload"), { recursive: true });
+
+	fs.writeFileSync(
+		path.join(storagePath, "server", ".serverdata.json"),
+		`{"version":"0.0.0", "lastUpdate":0}`,
+	); // TODO check for update
 
 	// Admin setup
 	console.log(chalk.green("\n[SETUP] Admin user:"));
