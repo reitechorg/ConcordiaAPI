@@ -7,8 +7,7 @@ function parseMysqlConnectionString(conn: string) {
 	// Ensure URL has a scheme so the URL parser can handle it
 	const normalized = conn.startsWith("mysql://") ? conn : "mysql://" + conn;
 
-	const regexp =
-		/(?:[a-zA-Z]+):\/\/([^:/?#]+)(?::([^@/?#]*))?@([^:/?#]+)(?::(\d+))?\/([^/?#]+)/;
+	const regexp = /\/\/([^:/?#]+)(?::(.+))?@([^:/?#]+)(?::(\d+))?\/([^/?#]+)/;
 
 	const data = regexp.exec(conn);
 
