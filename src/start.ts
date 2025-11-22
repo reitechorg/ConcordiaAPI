@@ -14,9 +14,11 @@ loadServerIcon();
 runHTTPServer();
 
 // Start update handler
-updateHandler();
-setInterval(() => {
+if (process.env.AUTO_UPDATE !== "false") {
 	updateHandler();
-}, 1000 * 60 * 60 * 25); // 25 hours
+	setInterval(() => {
+		updateHandler();
+	}, 1000 * 60 * 60 * 25); // 25 hours
+}
 
 console.log(chalk.green.bold("[MAIN] [INFO] Server started!"));
