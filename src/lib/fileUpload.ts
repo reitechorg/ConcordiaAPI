@@ -57,6 +57,7 @@ export default async function fileUpload(
 			// Make sure filetype is accepted
 			if (options?.acceptTypes && !options.acceptTypes.includes(file.mimetype))
 				return errorUnsuported(res, file.mimetype); // Check for overriden types
+
 			if (!acceptTypes.includes(file.mimetype))
 				return errorUnsuported(res, file.mimetype); // Check for safe types
 
@@ -74,21 +75,23 @@ export default async function fileUpload(
 					break;
 			}
 
+			// Create upload path if it doesn't exist yet
+			const uploadPath = path.join(process.env.FILE_PATH!, "upload");
+
+			if (!fs.existsSync(uploadPath))
+				fs.mkdirSync(uploadPath, {
+					recursive: true,
+				});
+
 			// Genereta a filename
 			let fileName = randomString(32, true); // Create a name
 
 			// Create a path
-			let generatedPath = options?.savePath
-				? `${options.savePath}/${fileName}${type}`
-				: path.join(process.env.FILE_PATH!, "upload", `${fileName}${type}`);
+			let generatedPath = makePath(options, fileName, type);
 
 			// Make sure no file exists with this name
-			while (fs.existsSync(generatedPath)) {
-				fileName = randomString(32, true);
-				generatedPath = options?.savePath
-					? `${options.savePath}/${fileName}${type}`
-					: path.join(process.env.FILE_PATH!, "upload", `${fileName}${type}`);
-			}
+			while (fs.existsSync(generatedPath))
+				generatedPath = makePath(options, fileName, type);
 
 			// Save file
 			fs.copyFileSync(file.filepath, generatedPath);
@@ -123,3 +126,13 @@ export default async function fileUpload(
 
 	return result ?? [];
 }
+
+const makePath = (
+	options: Options | undefined,
+	fileName: string,
+	type: string | undefined,
+) => {
+	return options?.savePath
+		? `${options.savePath}/${fileName}${type}`
+		: path.join(process.env.FILE_PATH!, "upload", `${fileName}${type}`);
+};
