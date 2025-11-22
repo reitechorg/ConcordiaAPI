@@ -1,5 +1,8 @@
 import path from "node:path";
 import sharp from "sharp";
+import { createAvatar } from "@dicebear/core";
+import { initials } from "@dicebear/collection";
+import { toWebp } from "@dicebear/converter";
 
 let serverIcon: string =
 	"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
@@ -33,39 +36,14 @@ async function generateIconPlaceholder() {
 	const size = 256;
 
 	const serverName = process.env.SERVER_NAME || "CC";
-	const initials = serverName
-		.split(" ")
-		.map((word) => word[0])
-		.join("");
-	const text = initials.toUpperCase().slice(0, 2);
 
-	const label = Buffer.from(`
-		<svg width="${256}" height="${256}">
-			<text x="50%" y="50%" text-anchor="middle" dy="0.25em" fill="#fff" font-size="${
-				size / 2
-			}px">${text}</text>
-		</svg>
-	`);
+	const icon = createAvatar(initials, {
+		seed: serverName,
+	});
 
-	const iconBuffer = await sharp({
-		create: {
-			width: size,
-			height: size,
-			channels: 4,
-			background: { r: 0, g: 187, b: 167, alpha: 1 },
-		},
-	})
-		.composite([
-			{
-				input: label,
-				top: 0,
-				left: 0,
-			},
-		])
-		.webp()
-		.toBuffer();
+	const webp = toWebp(icon);
 
-	serverIcon = `data:image/webp;base64,${iconBuffer.toString("base64")}`;
+	serverIcon = await webp.toDataUri();
 }
 
 export function getServerIcon() {
