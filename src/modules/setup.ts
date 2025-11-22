@@ -174,10 +174,11 @@ const setup = async () => {
 	fs.mkdirSync(path.join(storagePath, "server"), { recursive: true });
 	fs.mkdirSync(path.join(storagePath, "upload"), { recursive: true });
 
-	fs.writeFileSync(
-		path.join(storagePath, "server", ".serverdata.json"),
-		`{"version":"0.0.0", "lastUpdate":0}`,
-	); // TODO check for update
+	if (process.env.AUTO_UPDATE !== "false")
+		fs.writeFileSync(
+			path.join(storagePath, "server", ".serverdata.json"),
+			`{"version":"0.0.0", "lastUpdate":0}`,
+		); // TODO check for update
 
 	// Admin setup
 	console.log(chalk.green("\n[SETUP] Admin user:"));
