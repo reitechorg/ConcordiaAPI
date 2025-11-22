@@ -8,21 +8,18 @@ RUN         apk add --update --no-cache ca-certificates curl ffmpeg git openssl 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
+ENV FILE_PATH=/home/container
 
 COPY . /app
+COPY ./deploy/helkor/entrypoint.sh /entrypoint.sh
+
 WORKDIR /app
 RUN rm -rf .env node_modules
 RUN pnpm install --frozen-lockfile
-
-COPY ./deploy/helkor/entrypoint.sh /entrypoint.sh
+RUN pnpm prisma generate
 
 USER        container
 ENV         USER=container HOME=/home/container
-WORKDIR     /home/container
 
-ENV         USER=container HOME=/home/container
-
-USER	container
-ENV FILE_PATH=/home/container
 
 CMD [ "/bin/ash", "/entrypoint.sh" ]
