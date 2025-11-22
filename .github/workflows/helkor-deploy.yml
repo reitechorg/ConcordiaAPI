@@ -21,10 +21,6 @@ jobs:
                   registry: ghcr.io
                   username: ${{ github.repository_owner }}
                   password: ${{ secrets.GITHUB_TOKEN }}
-            - name: Lowercase repository user and name
-              run: |
-                  echo "REPO_USER=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')" >>${GITHUB_ENV}
-                  echo "REPO_NAME=$(echo '${{ github.event.repository.name }}' | tr '[:upper:]' '[:lower:]')" >>${GITHUB_ENV}
             - name: Build and push Docker image
               uses: docker/build-push-action@v4
               with:
@@ -33,4 +29,4 @@ jobs:
                   platforms: linux/amd64,linux/arm64
                   push: true
                   tags: |
-                      ghcr.io/${REPO_USER}/${REPO_NAME}:helkor
+                      ghcr.io/${{ github.repository_owner }}/concordiaapi:helkor
