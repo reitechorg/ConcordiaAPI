@@ -5,10 +5,11 @@ LABEL author="Helkor Hosting" maintainer="kontakt@helkor.eu"
 RUN         apk add --update --no-cache ca-certificates curl ffmpeg git openssl sqlite tar tzdata \
 	&& adduser -D -h /home/container container
 
+RUN corepack disable
+
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
-RUN corepack prepare pnpm
+RUN npm install -g pnpm
 
 ENV FILE_PATH=/home/container
 
