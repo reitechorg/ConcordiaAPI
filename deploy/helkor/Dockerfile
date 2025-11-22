@@ -8,6 +8,8 @@ RUN         apk add --update --no-cache ca-certificates curl ffmpeg git openssl 
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
+RUN corepack prepare pnpm
+
 ENV FILE_PATH=/home/container
 
 COPY . /app
