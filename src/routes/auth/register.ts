@@ -1,11 +1,11 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import db from "../../modules/database.js";
-import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import log from "../../lib/log.js";
 import { isCuid } from "@paralleldrive/cuid2";
 import { safeUser } from "../../lib/safeData.js";
-
+import fs from "node:fs";
+import { MakeUniqueFilePath, uploadFiles } from "../../lib/fileUpload.js";
 
 type BodyType = {
 	publicKey: string;
@@ -14,7 +14,10 @@ type BodyType = {
 	profileUrl?: string;
 };
 
-export default async function ApiRegister(req: FastifyRequest<{ Body: BodyType }>, res: FastifyReply) {
+export default async function ApiRegister(
+	req: FastifyRequest<{ Body: BodyType }>,
+	res: FastifyReply,
+) {
 	const { username, cuid, publicKey, profileUrl } = req.body;
 
 	// Make sure cuid is a valid cuid
@@ -32,14 +35,42 @@ export default async function ApiRegister(req: FastifyRequest<{ Body: BodyType }
 	if (user) return res.status(400).send({ message: "User already exists!" });
 
 	// Create new user
-	const newUser = await db.user.create({
+	let newUser = await db.user.create({
 		data: {
 			id: cuid,
 			name: username,
 			publicKey: publicKey,
-			profileUrl,
 		},
 	});
+
+	// Update user with an profilePicture if it's provided
+	if (profileUrl) {
+		// Convert image and save
+		const base64Data = profileUrl.replace(/^data:image\/\w+;base64,/, "");
+		const mimetype = profileUrl.slice(0, 20).split(":")[1].split(";")[0];
+		const buffer = Buffer.from(base64Data, "base64");
+		const filePath = MakeUniqueFilePath();
+		fs.writeFileSync(filePath, buffer);
+
+		// Add image to db
+		const file = await db.file.create({
+			data: {
+				filename: newUser.name,
+				mimetype: mimetype,
+				path: filePath,
+				authorId: newUser.id,
+			},
+		});
+
+		newUser = await db.user.update({
+			where: {
+				id: newUser.id,
+			},
+			data: {
+				profileUrl: process.env.URL + "/files/" + file.id,
+			},
+		});
+	}
 
 	// Create a token
 	const token = await db.token.create({

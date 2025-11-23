@@ -6,6 +6,7 @@ import log from "./log.js";
 import db from "../modules/database.js";
 import { RequestWithUser } from "../types/RequestWithUser.js";
 import path from "node:path";
+import { SavedMultipartFile } from "@fastify/multipart";
 
 const acceptTypes = [
 	"image/jpeg",
@@ -48,55 +49,41 @@ export default async function fileUpload(
 	// Get the files
 	const data = await req.saveRequestFiles();
 
-	// Make sure we got a files
+	// Make sure we got files
 	if (!data) return [];
-	let files: L_File[] = [];
+
 	// Process all files
+	const files = await uploadFiles(data, req.user!.id, res, options);
+	return files;
+}
+
+export async function uploadFiles(
+	files: SavedMultipartFile[],
+	userId: string,
+	res: FastifyReply,
+	options?: Options,
+) {
+	let uploadedFiles: L_File[] = [];
+
 	await Promise.all(
-		data.map(async (file) => {
-			// Make sure filetype is accepted
+		files.map(async (file) => {
+			// Validate file type
 			if (options?.acceptTypes && !options.acceptTypes.includes(file.mimetype))
 				return errorUnsuported(res, file.mimetype); // Check for overriden types
 
 			if (!acceptTypes.includes(file.mimetype))
-				return errorUnsuported(res, file.mimetype); // Check for safe types
+				return errorUnsuported(res, file.mimetype);
 
-			// Get the file type extension
-			let type;
-			switch (file.mimetype) {
-				case "image/jpeg":
-					type = ".jpg";
-					break;
-				case "image/png":
-					type = ".png";
-					break;
-				case "image/webp":
-					type = ".webp";
-					break;
-			}
+			// Make sure upload path exists
+			EnsureUploadPath();
 
-			// Create upload path if it doesn't exist yet
-			const uploadPath = path.join(process.env.FILE_PATH!, "upload");
-
-			if (!fs.existsSync(uploadPath))
-				fs.mkdirSync(uploadPath, {
-					recursive: true,
-				});
-
-			// Genereta a filename
-			let fileName = randomString(32, true); // Create a name
-
-			// Create a path
-			let generatedPath = makePath(options, fileName, type);
-
-			// Make sure no file exists with this name
-			while (fs.existsSync(generatedPath))
-				generatedPath = makePath(options, fileName, type);
+			// Generate file's path
+			const generatedPath = MakeUniqueFilePath();
 
 			// Save file
 			fs.copyFileSync(file.filepath, generatedPath);
 
-			files.push({
+			uploadedFiles.push({
 				filename: file.filename,
 				mimetype: file.mimetype,
 				path: generatedPath,
@@ -106,12 +93,12 @@ export default async function fileUpload(
 
 	// Add all files to database
 	await db.file.createMany({
-		data: files.map((file) => {
+		data: uploadedFiles.map((file) => {
 			return {
 				filename: file.filename,
 				mimetype: file.mimetype,
 				path: file.path,
-				authorId: req.user!.id,
+				authorId: userId,
 			};
 		}),
 	});
@@ -119,7 +106,7 @@ export default async function fileUpload(
 	const result = await db.file.findMany({
 		where: {
 			path: {
-				in: files.map((file) => file.path),
+				in: uploadedFiles.map((file) => file.path),
 			},
 		},
 	});
@@ -127,12 +114,32 @@ export default async function fileUpload(
 	return result ?? [];
 }
 
-const makePath = (
-	options: Options | undefined,
-	fileName: string,
-	type: string | undefined,
-) => {
+export function MakeUniqueFilePath() {
+	// Genereta a filename
+	let fileName = randomString(32, true); // Create a name
+
+	// Create a path
+	let generatedPath = makePath(undefined, fileName);
+
+	// Make sure no file exists with this name
+	while (fs.existsSync(generatedPath))
+		generatedPath = makePath(undefined, fileName);
+
+	return generatedPath;
+}
+
+const makePath = (options: Options | undefined, fileName: string) => {
 	return options?.savePath
-		? `${options.savePath}/${fileName}${type}`
-		: path.join(process.env.FILE_PATH!, "upload", `${fileName}${type}`);
+		? `${options.savePath}/${fileName}`
+		: path.join(process.env.FILE_PATH!, "upload", `${fileName}`);
 };
+
+export function EnsureUploadPath() {
+	// Create upload path if it doesn't exist yet
+	const uploadPath = path.join(process.env.FILE_PATH!, "upload");
+
+	if (!fs.existsSync(uploadPath))
+		fs.mkdirSync(uploadPath, {
+			recursive: true,
+		});
+}
