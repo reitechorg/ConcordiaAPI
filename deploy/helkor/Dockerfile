@@ -1,6 +1,7 @@
 FROM --platform=$TARGETOS/$TARGETARCH node:24-alpine
 
 LABEL author="Helkor Hosting" maintainer="kontakt@helkor.eu"
+LABEL org.opencontainers.image.source=https://github.com/reitechorg/Concordia
 
 RUN         apk add --update --no-cache ca-certificates curl ffmpeg git openssl sqlite tar tzdata \
 	&& adduser -D -h /home/container container
